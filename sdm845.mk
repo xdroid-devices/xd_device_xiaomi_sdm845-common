@@ -234,6 +234,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.keymaster@3.0 \
     android.hardware.keymaster@3.0.vendor \
+    android.hardware.keymaster@4.0 \
     android.hardware.keymaster@4.0.vendor
 
 # Lights
