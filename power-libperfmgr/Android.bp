@@ -20,7 +20,6 @@ cc_library {
     name: "libdisppower-xiaomi-sdm845",
     proprietary: true,
     srcs: [
-        "DisplayLowPower.cpp",
         "InteractionHandler.cpp",
     ],
     shared_libs: [
@@ -52,7 +51,6 @@ cc_binary {
         "pixel-power-ext-V1-ndk",
     ],
     srcs: [
-        "DisplayLowPower.cpp",
         "InteractionHandler.cpp",
         "Power.cpp",
         "PowerExt.cpp",
