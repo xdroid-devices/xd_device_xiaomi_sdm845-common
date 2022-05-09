@@ -64,6 +64,7 @@ static const uint16_t kVersion = HARDWARE_MODULE_API_VERSION(2, 1);
 using RequestStatus = android::hardware::biometrics::fingerprint::V2_1::RequestStatus;
 
 BiometricsFingerprint* BiometricsFingerprint::sInstance = nullptr;
+bool BiometricsFingerprint::sIsUdfps = false;
 
 BiometricsFingerprint::BiometricsFingerprint() : mClientCallback(nullptr), mDevice(nullptr) {
     sInstance = this; // keep track of the most recent instance
@@ -200,6 +201,9 @@ Return<RequestStatus> BiometricsFingerprint::enroll(const hidl_array<uint8_t, 69
 }
 
 Return<RequestStatus> BiometricsFingerprint::postEnroll() {
+    if (sIsUdfps) {
+        onFingerUp();
+    }
     return ErrorFilter(mDevice->post_enroll(mDevice));
 }
 
@@ -216,6 +220,9 @@ Return<RequestStatus> BiometricsFingerprint::enumerate() {
 }
 
 Return<RequestStatus> BiometricsFingerprint::remove(uint32_t gid, uint32_t fid) {
+    if (sIsUdfps) {
+        onFingerUp();
+    }
     return ErrorFilter(mDevice->remove(mDevice, gid, fid));
 }
 
@@ -253,7 +260,7 @@ void setFpVendorProp(const char* fp_vendor) {
     property_set("persist.vendor.sys.fp.vendor", fp_vendor);
 }
 
-fingerprint_device_t* getDeviceForVendor(const char* class_name) {
+fingerprint_device_t* BiometricsFingerprint::getDeviceForVendor(const char* class_name) {
     const hw_module_t* hw_module = nullptr;
     int err;
 
@@ -294,7 +301,7 @@ fingerprint_device_t* getDeviceForVendor(const char* class_name) {
     return fp_device;
 }
 
-fingerprint_device_t* getFingerprintDevice() {
+fingerprint_device_t* BiometricsFingerprint::getFingerprintDevice() {
     fingerprint_device_t* fp_device;
     std::string vendor_modules[] = {"fpc", "goodix", "goodix_fod", "syna"};
 
@@ -302,6 +309,10 @@ fingerprint_device_t* getFingerprintDevice() {
         if ((fp_device = getDeviceForVendor(vendor.c_str())) == nullptr) {
             ALOGE("Failed to load %s fingerprint module", vendor.c_str());
             continue;
+        }
+
+        if (!strcmp(vendor.c_str(), "goodix_fod") || !strcmp(vendor.c_str(), "syna")) {
+            sIsUdfps = true;
         }
 
         setFpVendorProp(vendor.c_str());
@@ -391,6 +402,9 @@ void BiometricsFingerprint::notify(const fingerprint_msg_t* msg) {
                          .isOk()) {
                     ALOGE("failed to invoke fingerprint onAuthenticated callback");
                 }
+                if (sIsUdfps) {
+                    getInstance()->onFingerUp();
+                }
             } else {
                 // Not a recognized fingerprint
                 if (!thisPtr->mClientCallback
@@ -416,21 +430,25 @@ void BiometricsFingerprint::notify(const fingerprint_msg_t* msg) {
 }
 
 Return<bool> BiometricsFingerprint::isUdfps(uint32_t /* sensorId */) {
-    return true;
+    return sIsUdfps;
 }
 
 Return<void> BiometricsFingerprint::onFingerDown(uint32_t /* x */, uint32_t /* y */,
                                                 float /* minor */, float /* major */) {
-    set(DISPPARAM_PATH, DISPPARAM_HBM_FOD_ON);
-    mDevice->extCmd(mDevice, COMMAND_NIT, PARAM_NIT_630_FOD);
-    set(FOD_STATUS_PATH, FOD_STATUS_ON);
+    if (sIsUdfps) {
+        set(DISPPARAM_PATH, DISPPARAM_HBM_FOD_ON);
+        mDevice->extCmd(mDevice, COMMAND_NIT, PARAM_NIT_630_FOD);
+        set(FOD_STATUS_PATH, FOD_STATUS_ON);
+    }
     return Void();
 }
 
 Return<void> BiometricsFingerprint::onFingerUp() {
-    set(DISPPARAM_PATH, DISPPARAM_HBM_FOD_OFF);
-    mDevice->extCmd(mDevice, COMMAND_NIT, PARAM_NIT_NONE);
-    set(FOD_STATUS_PATH, FOD_STATUS_OFF);
+    if (sIsUdfps) {
+        set(DISPPARAM_PATH, DISPPARAM_HBM_FOD_OFF);
+        mDevice->extCmd(mDevice, COMMAND_NIT, PARAM_NIT_NONE);
+        set(FOD_STATUS_PATH, FOD_STATUS_OFF);
+    }
     return Void();
 }
 
