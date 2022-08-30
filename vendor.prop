@@ -80,7 +80,6 @@ vendor.audio.use.sw.ape.decoder=true
 # Bluetooth
 persist.bluetooth.a2dp_offload.disabled=false
 persist.bluetooth.a2dp_offload.cap=sbc-aac-aptx-aptxhd-ldac
-persist.vendor.bt.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aac-ldac
 persist.vendor.bt.aac_frm_ctl.enabled=true
 persist.vendor.bt.enable.splita2dp=true
 persist.vendor.qcom.bluetooth.enable.splita2dp=true
@@ -90,9 +89,6 @@ vendor.qcom.bluetooth.soc=cherokee
 
 # Camera
 vendor.camera.aux.packagelist=com.android.camera,org.codeaurora.snapcam,org.pixelexperience.faceunlock
-
-# Charger
-ro.charger.enable_suspend=true
 
 # Chipset
 ro.soc.manufacturer=Qualcomm
@@ -123,8 +119,6 @@ persist.dbg.vt_avail_ovr=1
 persist.dbg.wfc_avail_ovr=1
 
 # Listen
-ro.audio.soundtrigger=sva
-ro.audio.soundtrigger.lowpower=true
 ro.vendor.audio.soundtrigger=sva
 ro.vendor.audio.soundtrigger.lowpower=true
 ro.vendor.audio.soundtrigger.20.key.level=40

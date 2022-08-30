@@ -7,10 +7,14 @@ ro.config.media_vol_steps=25
 ro.config.vc_call_vol_steps=11
 
 # Bluetooth
+persist.vendor.bt.a2dp_offload_cap=sbc-aptx-aptxtws-aptxhd-aac-ldac
 vendor.bluetooth.soc=cherokee
 
 # Camera
 camera.disable_zsl_mode=true
+
+# Charger
+ro.charger.enable_suspend=true
 
 # Data modules
 persist.data.df.dev_name=rmnet_usb0
@@ -44,6 +48,10 @@ sdm.debug.disable_inline_rotator_secure=1
 
 # IMS
 persist.vendor.ims.disableUserAgent=0
+
+# Listen
+ro.audio.soundtrigger=sva
+ro.audio.soundtrigger.lowpower=true
 
 # Media
 debug.stagefright.omx_default_rank.sw-audio=1
